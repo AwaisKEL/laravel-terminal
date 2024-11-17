@@ -187,4 +187,28 @@ class Kernel implements KernelContract
 
         return call_user_func_array([$this->artisan, $name], $arguments);
     }
+
+    /**
+     * Register a callback to be invoked when the command lifecycle duration exceeds a given amount of time.
+     *
+     * @param  \DateTimeInterface|\Carbon\CarbonInterval|float|int  $threshold
+     * @param  callable  $handler
+     * @return void
+     */
+    public function whenCommandLifecycleIsLongerThan($threshold, $handler)
+    {
+        $threshold = $threshold instanceof DateTimeInterface
+            ? $this->secondsUntil($threshold) * 1000
+            : $threshold;
+
+        $threshold = $threshold instanceof CarbonInterval
+            ? $threshold->totalMilliseconds
+            : $threshold;
+
+        $this->commandLifecycleDurationHandlers[] = [
+            'threshold' => $threshold,
+            'handler' => $handler,
+        ];
+    }
+
 }
